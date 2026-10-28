@@ -1,7 +1,9 @@
 # OAuth App Setup Guides
 
 **Live:** TODO-your-railway-url  ·  **Access code for live generation:** shared in the submission form
-Created by - Jai Anmol Sharma  (IIT Kanpur)
+
+**Created by - Jai Anmol Sharma  (IIT Kanpur)**
+
 Before an AI agent's users can click "Connect Gmail", the developer may have to register an OAuth app with the
 provider and get it approved. Today they find out how hard that is by trial and error. This tool tells them up
 front: how difficult it is, how long it takes including the approval wait, what can block them, and which steps
