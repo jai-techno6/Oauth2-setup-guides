@@ -107,7 +107,7 @@ def test_pipeline_end_to_end(tmp_path, no_dns, fake_http):
     assert guide.walls() and "login.acme.example" in guide.walls()[0].result
 
     # research UNKNOWNS merged, progress streamed for every stage
-    assert "Review cost is not published" in guide.unknowns
+    assert guide.unknowns == ["Cost"]  # the guide's own list wins; research notes only fill an empty list
     stages = {d.get("stage") for t, d in events if t == "step"}
     assert {"resolve", "research", "sources", "synthesize", "probe", "verify", "done"} <= stages
     assert guide.pipeline_log
@@ -119,3 +119,11 @@ def test_pipeline_fails_cleanly_when_all_research_fails(tmp_path, no_dns, fake_h
 
     with pytest.raises(PipelineError):
         asyncio.run(run_pipeline("Acme", make_settings(tmp_path), emit, llm=FakeLLM(fail_research=True), http=fake_http))
+
+def test_placeholder_urls_are_not_sources():
+    from app.agent.research import is_real_url
+    for bad in ["https://`hostname`/services/oauth2/authorize`", "http://localhost:1717/OauthRedirect`",
+                "https://localhost`", "https://yourdomain.com/callback", "https://{instance}.salesforce.com/x"]:
+        assert not is_real_url(bad), bad
+    for good in ["https://help.salesforce.com/s/articleView?id=x", "https://developers.zoom.us/docs/integrations/`"]:
+        assert is_real_url(good), good

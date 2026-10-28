@@ -77,7 +77,7 @@ class ResearchResult:
 
 def clean_url(url: str) -> str:
     """Drop tracking params (OpenAI adds utm_source=openai) and fragments."""
-    url = url.strip().rstrip(".,;:")
+    url = url.strip().strip("`").rstrip(".,;:`")
     try:
         parts = urlsplit(url)
     except ValueError:
@@ -85,6 +85,25 @@ def clean_url(url: str) -> str:
     query = [(k, v) for k, v in parse_qsl(parts.query, keep_blank_values=True) if not k.lower().startswith("utm_")]
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), ""))
 
+def is_real_url(url: str) -> bool:
+    """False for placeholder URLs copied from docs examples, e.g. https://`hostname`/services/oauth2/authorize,
+    http://localhost:1717/OauthRedirect or https://yourdomain.com/callback. These are not sources and must
+    not be probed as endpoints."""
+    url = (url or "").strip().strip("`").rstrip(".,;:`")
+    if any(ch in url for ch in "`{}<>"):
+        return False
+    try:
+        host = (urlsplit(url).hostname or "").lower()
+    except ValueError:
+        return False
+    if "." not in host or host == "localhost" or host.startswith(("127.", "10.", "192.168.", "0.")):
+        return False
+    if host.endswith((".local", ".test", ".invalid", ".localhost")):
+        return False
+    if any(word in host for word in ("yourdomain", "your-domain", "mydomain", "my-domain", "yourcompany",
+                                     "yourinstance", "your-instance", "example.com", "example.org")):
+        return False
+    return True
 
 def parse_notes(notes: str) -> tuple[list[str], str, list[str]]:
     domains: list[str] = []
@@ -99,7 +118,7 @@ def parse_notes(notes: str) -> tuple[list[str], str, list[str]]:
             value = stripped.split(":", 1)[1].strip().lower().split()[0:1]
             if value and value[0] in ("yes", "no", "partial", "unknown"):
                 support = value[0]
-    inline_urls = [clean_url(u) for u in _url_re.findall(notes)]
+    inline_urls = [clean_url(u) for u in _url_re.findall(notes) if is_real_url(u)]
     return domains, support, inline_urls
 
 
@@ -119,9 +138,9 @@ async def research_topic(llm: LLM, app: str, topic: tuple[str, str, str]) -> Res
     result.oauth_support = support
     result.queries = queries
     titles: dict[str, str] = {}
-    for url, t in [(u, "") for u in inline] + [(clean_url(u), t) for u, t in cited]:
+    for url, t in [(u, "") for u in inline] + [(clean_url(u), t) for u, t in cited if is_real_url(u)]:
         if url not in titles or (t and not titles[url]):
             titles[url] = t
     result.cited = list(titles.items())
-    result.consulted = [(clean_url(u), t) for u, t in consulted]
+    result.consulted = [(clean_url(u), t) for u, t in consulted if is_real_url(u)]
     return result

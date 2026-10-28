@@ -24,7 +24,7 @@ from . import composio
 from .llm import LLM
 from .netsafe import FetchResult, make_client, safe_get
 from .probe import run_probes
-from .research import TOPICS, ResearchResult, research_topic
+from .research import TOPICS, is_real_url, ResearchResult, research_topic
 from .synthesize import build_sources, synthesize, to_guide
 from .verify import check_quotes, enforce_rules
 
@@ -111,10 +111,20 @@ async def run_pipeline(query: str, settings: Settings, emit: Emit, *, llm: Optio
         if not guide.app_url and app_url:
             guide.app_url = app_url
         guide.aliases = sorted({app_name.lower(), (guide.app_name or "").lower()} - {""})
-        for r in good:
-            for c in [ln.strip("- ").strip() for ln in _section(r.notes, "UNKNOWNS")]:
-                if c and c.lower() != "none" and c not in guide.unknowns and len(guide.unknowns) < 10:
-                    guide.unknowns.append(c)
+        for field in ("authorization_url", "token_url", "developer_console_url", "docs_url"):
+            if getattr(guide.endpoints, field) and not is_real_url(getattr(guide.endpoints, field)):
+                setattr(guide.endpoints, field, "")
+        for phase in guide.phases:
+            for s in phase.steps:
+                if s.url and not is_real_url(s.url):
+                    s.url = ""
+        # The guide's own "unknowns" are already de-duplicated and written for the reader. The raw research
+        # notes repeat each other across passes, so they are only a fallback when the guide lists none.
+        if not guide.unknowns:
+            for r in good:
+                for c in [ln.strip("- ").strip() for ln in _section(r.notes, "UNKNOWNS")]:
+                    if c and c.lower() != "none" and c not in guide.unknowns and len(guide.unknowns) < 8:
+                        guide.unknowns.append(c)
         enforce_rules(guide)
         await step("synthesize", f"Draft ready: tier '{guide.difficulty}', {sum(len(p.steps) for p in guide.phases)} steps, "
                                  f"{len(guide.blockers)} blocker(s)")

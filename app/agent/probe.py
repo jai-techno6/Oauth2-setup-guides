@@ -11,6 +11,7 @@ Those stopping points are real data for the "where you take over" section.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from typing import Awaitable, Callable
 from urllib.parse import urlsplit
@@ -91,6 +92,15 @@ async def probe_authorize(fetch: Fetcher, url: str) -> Probe:
                  checked_at=_now(), method=METHOD)
 
 
+_PASSWORD_RE = re.compile(r"<input[^>]+type=[\"']?password", re.I)
+
+
+def _has_login_form(body: str) -> bool:
+    """A real sign-in page has a password field. A docs page with a 'Sign in' link in the header does not;
+    treating that as a login wall produced false 'tested' claims."""
+    return bool(_PASSWORD_RE.search(body))
+
+
 async def probe_console(fetch: Fetcher, url: str) -> Probe:
     res = await fetch(url)
     hops = res.hops[1:] if len(res.hops) > 1 else []
@@ -102,13 +112,18 @@ async def probe_console(fetch: Fetcher, url: str) -> Probe:
         text = f"Redirected to a sign-in page ({_host(login_hop)}). A human must log in to create the app."
         outcome = "blocked"
     elif res.status in (401, 403, 429):
-        text = f"HTTP {res.status}: the console blocks automated clients. A human needs a real browser session."
+        text = (f"HTTP {res.status}: this page refuses automated visitors, so the agent cannot go further here. "
+                "A human needs a real browser session.")
         outcome = "blocked"
-    elif res.ok and any(w in res.body.lower() for w in ("sign in", "log in", "login", "captcha")):
-        text = "Page loads but asks the visitor to sign in. A human must log in to create the app."
+    elif res.ok and _has_login_form(res.body):
+        text = "Page shows a sign-in form. A human must log in to create the app."
+        outcome = "blocked"
+    elif res.ok and "captcha" in res.body.lower():
+        text = "Page shows a CAPTCHA. A human must complete it before the agent can continue."
         outcome = "blocked"
     elif res.ok:
-        text = f"HTTP {res.status}: page loads without sign-in (it may be a public landing page)."
+        text = (f"HTTP {res.status}: page loads without sign-in. It looks like a public docs or landing page, "
+                "so this does not show where the agent would be stopped.")
         outcome = "info"
     else:
         text = f"HTTP {res.status}."

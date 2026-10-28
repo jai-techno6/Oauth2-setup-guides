@@ -1,16 +1,103 @@
 # OAuth App Setup Guides
 
+**Live:** TODO-your-railway-url  ·  **Access code for live generation:** shared in the submission form
+
 Before an AI agent's users can click "Connect Gmail", the developer may have to register an OAuth app with the
-provider and get it approved. This tool tells them up front how hard that is: the difficulty tier, hands-on time,
-approval wait, requirements, what can block them, and which steps an agent can do versus where they take over.
-Every claim is labelled **tested**, **cited**, **inferred**, or **unknown**.
+provider and get it approved. Today they find out how hard that is by trial and error. This tool tells them up
+front: how difficult it is, how long it takes including the approval wait, what can block them, and which steps
+an agent can do versus where they have to take over. Every claim is labelled **tested**, **cited**,
+**inferred** or **unknown**, so they know how far to trust it.
 
 It has two parts:
 
-- **A curated library** of six guides chosen to cover each difficulty tier: GitHub (trivial), HubSpot (moderate),
-  Slack and Google/Gmail (hard), LinkedIn and X (gated). Each one was spot-checked against provider docs on 2026-10-28.
+- **A curated library** of six guides chosen to cover every difficulty tier: GitHub (trivial), HubSpot
+  (moderate), Slack and Google/Gmail (hard), LinkedIn and X (gated).
 - **Live generation.** Type any app name or website. A research agent investigates it while you watch and
-  produces a guide with a shareable permalink, plus Markdown and JSON exports.
+  produces a guide with a shareable link, plus Markdown and JSON exports.
+
+## The problem, as I understood it
+
+Three layers are involved when an agent's user connects an app:
+
+1. **The provider OAuth app**: a one-time registration with Google, Slack and so on. It gives a client ID and
+   secret, a redirect URI, the permissions (scopes) and the consent screen users see.
+2. **The developer's integration**: in Composio, an auth config that points at that OAuth app.
+3. **User connections**: each end user approves the consent screen; Composio stores and refreshes their tokens.
+
+Layers 2 and 3 work the same for every provider. Layer 1 does not: GitHub takes five minutes, Gmail can take
+weeks plus a paid security assessment, and LinkedIn may simply refuse access. Composio's
+[managed OAuth apps](https://docs.composio.dev/toolkits/managed-auth) let developers skip layer 1 while
+prototyping. They come back to it when they need their own name on the consent screen, custom scopes, their
+own rate limits, or an app Composio does not manage. That moment is what this tool is for.
+
+## Key product decisions
+
+**Focus on approval, not OAuth mechanics.** Creating an OAuth app is a form almost everywhere. What makes
+timelines swing from minutes to months is what happens before *external* users can connect: verification,
+marketplace review, install caps, business checks, paid tiers. The guides spend their space there.
+
+**Two clocks, not one.** Every guide separates hands-on time (usually under an hour) from the wait for the
+provider (none to several weeks), and gives the fastest way to start while waiting. Providers' docs blur these.
+
+**Difficulty is set by the hardest step for real users, and depends on the permissions requested.** Gmail
+send-only is a lighter review; reading mail triggers restricted-scope verification and an annual security
+assessment. Slack is often called "moderate", but for an agent that reads messages it is hard: since 2025,
+unlisted commercial apps get 1 request/minute on message history, and a Marketplace listing needs 10 active
+workspaces plus up to ~10 weeks of review.
+
+**Answer "do I need my own app at all?" first.** Each guide states whether Composio already provides a managed
+OAuth app, because for prototyping the honest answer is often "not yet".
+
+**Evidence labels are enforced in code, not trusted to the model.**
+- Only checks the code runs can produce **tested**. The model may only say cited, inferred or unknown.
+- A **cited** claim with no valid source is downgraded to inferred.
+- The agent fetches each cited page and looks for the quoted sentence. If it is not there, the claim is
+  downgraded. If the page cannot be read (bot protection, JavaScript-only), it is flagged "not machine-checked".
+- Sources are tagged official, Composio or third-party, so a price only a blog states shows up that way.
+- Conflicting sources are shown side by side instead of being resolved silently.
+
+**The agent does what it can without credentials and records where it stops.** It reads OAuth discovery
+documents, checks the authorization endpoint is live, and opens the developer console. Where it hits a sign-in
+form or bot block, that becomes tested evidence for the "you take over" section. It never logs in, accepts terms,
+pays or solves CAPTCHAs; those steps are exactly what the guide hands to the developer.
+
+**A fixed guide format.** Every guide has the same sections (tier, time, steps marked agent or you,
+requirements, gotchas, blockers with workarounds, unknowns, sources), so guides are comparable, shareable and
+easy to check. The model fills it through structured output.
+
+## What I checked, corrected, and could not verify
+
+**Curated guides.** Spot-checked against provider docs on 2026-10-28. Full table at `/audit`. Highlights:
+
+| Common belief | Result | Basis |
+|---|---|---|
+| Slack is moderate | **Corrected: hard** for agents that read messages | Slack changelog (2025-05-29), Marketplace review guide |
+| Slack review: 10 business days + up to 10 weeks, 10 active workspaces | **Verified** (re-checked independently) | Slack Marketplace review guide |
+| `gmail.compose` is a sensitive scope | **Corrected: restricted** | Gmail scopes page |
+| GitHub OAuth tokens never expire | **Corrected:** short-lived tokens are on by default for new apps (8 h / 6 months) | GitHub docs and changelog |
+| GitHub callbacks always match exactly | **Corrected:** wildcard matching is per callback; single-callback apps created before Aug 3, 2026 have it on | GitHub docs (re-checked) |
+| LinkedIn gives refresh tokens | **Corrected:** only to approved partners; others re-authorise every 60 days | LinkedIn docs |
+| X needs a Basic/Pro subscription | **Corrected:** pay-per-use credits since early 2026 | X docs + third-party pricing posts |
+| Gmail needs verification + security assessment | **Verified** for restricted scopes | Google restricted-scope docs |
+| Cost of Google's security assessment (CASA) | **Could not verify:** third-party figures range widely; Google publishes none | Left as a range, flagged |
+
+**The live agent.** I compared a generated Zoom guide with Zoom's own pages:
+
+| Agent's claim | Result |
+|---|---|
+| External sharing approval: Zoom replies within 3-4 business days | **Verified** |
+| Needs SSDLC docs, SAST/DAST scan results and a privacy policy | **Verified but incomplete:** Zoom also requires any 3 of 5 further documents (pen-test summary, security policy, incident response, etc.). The agent missed this |
+| Refresh tokens expire after 90 days | **Verified** (Zoom staff, developer forum) |
+| Developer console "asks the visitor to sign in" (labelled tested) | **Wrong, fixed in code:** the agent had opened a docs page with a "Sign in" link in its header. The probe now requires a real sign-in form |
+
+**Setup attempts by hand.** TODO: fill in from your own attempts, e.g.
+- GitHub OAuth app: registered in __ minutes; short-lived tokens were / were not on by default.
+- Google Cloud OAuth client: created in __ minutes; the console labelled `gmail.readonly` as Restricted.
+
+**What I learned.** The quote check catches invented sources but not omissions: a guide can be accurate and
+still miss a requirement, as the Zoom one did. Generated guides are a strong first draft, so every agent guide
+says "not reviewed by a person". The useful metric for the agent is how often its tier and approval wait match
+a human check; `docs/MANUAL_CHECKS.md` lists the checks.
 
 ## Run it locally
 
@@ -20,163 +107,69 @@ Requires Python 3.11+.
 python -m venv .venv
 # Windows: .venv\Scripts\activate      macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
-cp .env.example .env        # Windows: copy .env.example .env
-# edit .env and set OPENAI_API_KEY
-python -m pytest            # offline tests; no API key or internet needed
+cp .env.example .env        # then set OPENAI_API_KEY
+python -m pytest            # offline tests, no key needed
 python -m app               # http://127.0.0.1:8000
 ```
 
-Without `OPENAI_API_KEY`, the curated library still works and the generate box explains that live generation is off.
-
-To try the live agent from the command line (this checks your key and model before you deploy):
-
-```bash
-python scripts/try_generate.py "Notion"
-```
+Without `OPENAI_API_KEY` the curated library still works and live generation is switched off.
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `OPENAI_API_KEY` | (required for live generation) | Research and writing |
-| `OPENAI_MODEL` | `gpt-5.4-mini` | Any Responses-API model that supports the `web_search` tool |
-| `OPENAI_REASONING_EFFORT` | `low` | `low`/`medium`/`high`. If the model rejects it, the app retries without it |
-| `COMPOSIO_API_KEY` | empty | Optional. Checks Composio's live toolkit catalog for managed OAuth (marked **tested**) |
-| `ACCESS_CODE` | empty | If set, live generation requires this code. **Set it on any public URL** to protect your OpenAI bill |
-| `GENERATE_RATE_PER_HOUR` | `10` | Live generations per client IP per hour |
-| `MAX_CONCURRENT_JOBS` | `3` | Agent runs in parallel; extra jobs queue |
-| `DATA_DIR` | `./var` | Where the SQLite file of generated guides lives |
+| `OPENAI_MODEL` | `gpt-5.4-mini` | Any Responses-API model with the `web_search` tool |
+| `OPENAI_REASONING_EFFORT` | `low` | `low` / `medium` / `high` |
+| `COMPOSIO_API_KEY` | empty | Optional: checks Composio's live catalog for managed OAuth |
+| `ACCESS_CODE` | empty | Required to run live generation. **Set it on any public URL** |
+| `GENERATE_RATE_PER_HOUR` | `10` | Live generations per IP per hour |
+| `DATA_DIR` | `./var` | Where generated guides are stored (SQLite) |
 
 ## Deploy on Railway
 
-1. Push this folder to a GitHub repo and create a new Railway service from it (**New Project > Deploy from
-   GitHub repo**). Railway detects Python from `requirements.txt` and `.python-version`.
-2. `railway.json` sets the start command (`python -m app`), the healthcheck (`/healthz`) and the restart policy,
-   so no manual settings are needed. The app reads Railway's `PORT`.
-3. Under **Variables**, add `OPENAI_API_KEY`, `ACCESS_CODE`, and optionally `COMPOSIO_API_KEY`.
-4. **Persist generated guides:** add a Volume mounted at `/data` and set `DATA_DIR=/data`. Without a volume,
-   generated guides disappear on each redeploy. Curated guides live in the repo and are never lost.
-5. Under **Networking**, generate a domain. Open `/healthz`; it should report `"curated": 6, "load_errors": 0`.
+1. Push to GitHub, then in Railway choose **New Project → Deploy from GitHub repo**.
+2. Start command `python -m app`, healthcheck `/healthz` (set by `railway.json` if present; otherwise set
+   them under Settings → Deploy). The app reads Railway's `PORT`.
+3. Variables: `OPENAI_API_KEY`, `ACCESS_CODE`, optionally `COMPOSIO_API_KEY`.
+4. Add a Volume mounted at `/data` and set `DATA_DIR=/data`, or generated guides vanish on each redeploy.
+5. Generate a domain and open `/healthz`; it should show `"curated": 6`.
 
 ## Using it
 
-- `/` is the library and the generate box. Entering an app that already has a guide opens the existing one
-  (curated first, then the newest generated guide). Agent guides have a "Regenerate" button.
-- `/guides/<slug>` is the shareable guide. It has a checklist (ticks are saved in your browser), "Copy link",
-  "Copy as Markdown" (for pasting into Slack, Notion or a PR), JSON, and print.
-- `/jobs/<id>` shows live progress. You see each research pass, the search queries, the sources found, each
-  probe result and the quote-check counts.
-- `/audit` shows what was checked in the curated guides, and what was corrected.
-- `/about` explains the method and the evidence labels.
-- `/api/docs` is the OpenAPI documentation.
-
-## Key decisions
-
-**Scope: approval-gated providers and the "where you take over" boundary.** Every provider handles user
-connections and token refresh (layers 2 and 3) the same way. The provider OAuth app (layer 1) is where time
-estimates swing from five minutes to months. The guides therefore focus on what blocks production use by
-*external* users (verification, listing review, install caps, legal entity requirements, paid tiers) rather
-than on OAuth mechanics. Each guide also answers "do I need my own app at all?" using Composio's managed-app
-status, because for prototyping the honest answer is often "not yet".
-
-**The difficulty tier is set by the hardest step required for external users, not by the signup form.** This
-changed results. Slack is usually called "moderate". Slack's 2025 terms limit unlisted commercial apps to
-1 request/minute on message history, and a Marketplace listing needs 10 active workspaces plus up to about
-10 weeks of review. For an agent that reads messages, that makes Slack hard.
-
-**Evidence labels are enforced in code, not by the model's word.**
-- The model may only output `cited`, `inferred` or `unknown`. Only checks the code runs produce `tested`.
-- A `cited` claim with no valid source is downgraded to `inferred`.
-- The agent fetches every cited page and searches it for the quote. A quote that cannot be found on a readable
-  page downgrades the claim to `inferred`. If the page is blocked or JavaScript-only, the claim is flagged
-  "not machine-checked" and keeps its label.
-- Sources are tagged official, Composio or third-party, so a price that only a blog states shows up that way.
-
-**The agent attempts as much setup as it can without credentials, and records where it is stopped.** Instead of
-a full browser agent, the probe step uses HTTP: it fetches OAuth/OpenID discovery documents, checks that the
-authorization endpoint is live, and opens the developer console. A login redirect or a bot block (HTTP 403) is
-recorded as **tested** evidence for the "you take over" section. The agent never logs in, signs terms, pays or
-solves CAPTCHAs. Those are exactly the steps the guide hands to the developer.
-
-**A fixed schema over free text.** Every guide has the same sections (tier, time split into hands-on and
-approval wait, fastest path, phases with agent/human steps, requirements, gotchas, blockers with workarounds,
-conflicts, unknowns, sources, probes). That makes guides comparable, renderable, exportable and testable. The
-model fills it through OpenAI structured outputs in strict mode.
-
-**Three narrow research passes in parallel** (registration, approval and distribution, paid tiers and recent
-changes) instead of one broad prompt. Narrow questions find review timelines and install caps more reliably,
-running in parallel keeps the live demo to roughly 1-3 minutes, and each pass streams progress.
-
-**Edge cases.** For an app with no third-party OAuth, the guide gets a `no_oauth` tier that names the auth method the
-provider does offer. Conflicting sources go into a "Where sources disagree" list instead of being resolved silently
-(the Gmail CASA cost ranges from about $540 to $50k+ depending on the source). Paid access is a `gated` tier with
-cost guidance (X). Unknown or ambiguous apps get the `unknown` tier and low confidence.
-
-## Evidence audit (summary)
-
-A full table is at `/audit`. Highlights:
-
-| Claim (common belief) | Result | Basis |
-|---|---|---|
-| Slack is moderate | **Corrected: hard** for agents that read messages | Slack changelog (2025-05-29) and Marketplace review guide |
-| gmail.compose is a sensitive scope | **Corrected: restricted** | Gmail scopes page |
-| GitHub OAuth tokens never expire | **Corrected:** expiring tokens are on by default (8 h / 6 months) | GitHub docs |
-| GitHub callbacks must match exactly | **Corrected:** wildcard matching is per callback; apps created before 2026-08-03 have it on | GitHub docs |
-| LinkedIn gives refresh tokens | **Corrected:** only to approved MDP partners; others get 60-day tokens | LinkedIn docs |
-| GitHub wildcard cutoff date (Aug 3, 2026) | **Re-verified** independently against GitHub's callback-URL docs | GitHub docs |
-| Slack review: 10 business days + up to 10 weeks, 10 active workspaces | **Re-verified** independently | Slack Marketplace review guide |
-| X needs a Basic/Pro subscription | **Corrected:** now pay-per-usage credits | X docs snippet and third-party pricing posts |
-| HubSpot apps are created in the web UI | **Corrected:** CLI/project platform; 10/25 install caps before listing | HubSpot changelog and docs |
-| Gmail needs verification plus CASA | **Verified** for restricted scopes processed on your servers | Google restricted-scope page |
-| Composio redirect URI | **Conflict:** Composio's own guide shows both v1 and v3 URLs | Guide tells you to copy it from your auth config |
-| CASA cost | **Conflict:** $540/yr to $50k+ in third-party sources; Google publishes none | Left as a range |
-
-**What "tested" means here.** These checks were run on 2026-10-28 without credentials: the Google and LinkedIn
-OpenID discovery documents (endpoints confirmed) and the Google Cloud console (redirects to sign-in). GitHub,
-Slack, LinkedIn and X consoles returned HTTP 403 to automated clients. HubSpot returned a JavaScript shell.
-
-**What was not done.** No developer accounts were created and no OAuth app was registered or submitted for
-review. Hands-on times are therefore labelled **inferred**. `docs/MANUAL_CHECKS.md` lists the checks to do by
-hand to turn them into tested numbers.
+- `/`: the library and the generate box. An app that already has a guide opens it directly.
+- `/guides/<slug>`: the shareable guide, with a checklist, copy link, copy as Markdown, JSON and print.
+- `/jobs/<id>`: live progress: each search, source, probe and quote check as it happens.
+- `/audit`: what was checked and corrected in the curated guides. `/about`: method and labels.
 
 ## Limitations
 
-- **No authenticated browser agent.** The probe uses plain HTTP and stops at the first login or bot wall. That is
-  honest, but it learns less than a real walkthrough. A Playwright agent driving a logged-in console session is the
-  natural next step.
-- **Many official pages block automated fetches** (Slack, X, parts of GitHub). In those cases the quote check
-  reports "not machine-checked" instead of verifying.
-- **Quote checks match text, not meaning.** A real quote placed next to the wrong claim would pass. Spot-check
-  anything you plan a launch around.
-- **Time estimates are thin.** Providers rarely publish review times, and live guides often leave the wait as unknown.
-- **Generated guides are not reviewed by a person.** The UI says so on every agent guide.
-- **In-memory jobs.** Progress streams live in one process. A restart drops in-flight jobs (saved guides persist
-  with a volume). Run one instance.
-- **SSRF protection** blocks private and loopback addresses and non-standard ports on every redirect hop. It does
-  not defend against DNS rebinding between the check and the connection.
-- **Rate limiting is per IP and in memory.** Use `ACCESS_CODE` on public deployments.
-- **Six curated guides, not 100.** The schema, rendering and pipeline would carry a larger library. Batch-generating
-  the remaining guides and then human spot-checking them is straightforward follow-up work.
+- **No logged-in browser agent.** The agent stops at the first sign-in page. A browser agent working inside the
+  developer's own logged-in session is the natural next step: it could fill in the app form itself.
+- **Many official docs block automated reading** (Slack, X, parts of GitHub), so some quotes are "not
+  machine-checked".
+- **Quote checks match text, not meaning**, and do not catch omissions. Check anything you plan a launch around.
+- **Approval times are thin.** Providers rarely publish them; guides say "unknown" rather than guess.
+- **Generated guides can repeat a source or an unknown** when parallel research passes overlap.
+- **Six curated guides, not 100.** The format and pipeline would carry a larger library; batch-generating the
+  rest and spot-checking a sample is the follow-up.
+- **Single instance.** In-progress jobs and rate limits live in memory; a restart drops running jobs (saved
+  guides persist with a volume).
 
 ## Project layout
 
 ```
 app/
-  main.py            routes: pages, API, SSE progress stream
-  models.py          guide schema and evidence labels
+  main.py            pages, API, live progress stream
+  models.py          guide format and evidence labels
   store.py           curated JSON + SQLite for generated guides
-  jobs.py            background jobs, replayable progress events, rate limiter
-  render.py          Markdown export
   agent/
-    pipeline.py      resolve -> research -> synthesize -> probe -> Composio -> verify
-    research.py      three parallel web-search passes (OpenAI Responses API, web_search tool)
-    synthesize.py    strict JSON schema output into the guide model
-    probe.py         discovery docs, authorize endpoint, console login walls
-    verify.py        evidence-rule enforcement and quote checks against cited pages
-    netsafe.py       SSRF-safe fetching
-    composio.py      optional live Composio catalog lookup
-  data/guides/*.json curated guides
-  templates/, static/
-tests/               offline tests (fake LLM, mocked HTTP)
+    pipeline.py      research → write → probe → verify
+    research.py      three parallel web-search passes
+    synthesize.py    structured output into the guide format
+    probe.py         discovery docs, authorize endpoint, console sign-in walls
+    verify.py        evidence rules and quote checks
+  data/guides/       the six curated guides
+tests/               offline tests (fake model, mocked HTTP)
 docs/MANUAL_CHECKS.md
 ```
 
-No credentials are in the repo. `.env` is git-ignored.
+No credentials are in the repo; `.env` is git-ignored.
