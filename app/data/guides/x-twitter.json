@@ -1,0 +1,106 @@
+{
+  "slug": "x-twitter",
+  "app_name": "X (Twitter)",
+  "app_url": "https://x.com",
+  "aliases": ["x", "twitter", "x.com", "twitter.com", "x api", "twitter api"],
+  "origin": "curated",
+  "generated_at": "2026-10-28",
+  "model": "curated",
+  "summary": "Gated by payment. You can create an X app and enable OAuth 2.0 in the developer console without review. Every API call draws down prepaid credits, so there is no useful free usage. Budget per request: third-party breakdowns put post reads at about $0.005 and a post containing a link at $0.20. Watch the 30-second authorization-code expiry.",
+  "oauth_support": "yes",
+  "oauth_support_claim": {"text": "X supports OAuth 2.0 Authorization Code with PKCE (X API v2), and OAuth 1.0a.", "evidence": "cited", "source_ids": [1], "quote": "OAuth 2.0 can be used with the X API v2 only.", "quote_check": "verified", "note": ""},
+  "difficulty": "gated",
+  "difficulty_claim": {
+    "text": "No review blocks you, but API access is pay-per-usage with prepaid credits, so a payment method and a usage budget are required before your agent can do anything useful.",
+    "evidence": "cited", "source_ids": [2],
+    "quote": "The X API uses pay-per-usage pricing.",
+    "quote_check": "not_checked", "note": "The official page refused automated fetch (HTTP 403). Quote from a search snippet of docs.x.com."
+  },
+  "composio": {
+    "status": "unknown",
+    "claim": {"text": "Not confirmed. Even with a managed app, someone pays for X API usage. Check how Composio bills X calls.", "evidence": "unknown", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Set COMPOSIO_API_KEY and regenerate to check the live catalog."}
+  },
+  "endpoints": {
+    "developer_console_url": "https://developer.x.com/en/portal/dashboard",
+    "docs_url": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code",
+    "authorization_url": "https://x.com/i/oauth2/authorize",
+    "token_url": "https://api.x.com/2/oauth2/token",
+    "evidence": "inferred",
+    "note": "Common X OAuth 2.0 endpoints, not tested live. The fetched docs page did not show the URLs in text."
+  },
+  "time": {
+    "hands_on": {"text": "20-40 minutes (developer account, app, OAuth 2.0 settings, credits)", "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Estimate."},
+    "approval_wait": {"text": "No app review found in the docs. Paying for credits is the gate.", "evidence": "inferred", "source_ids": [2, 3], "quote": "", "quote_check": "no_quote", "note": "No review step appears in the sources checked. Enterprise access goes through an interest form with no published price."},
+    "fastest_path": {"text": "Buy a small credit balance, cap auto-recharge, and test with your own account first.", "evidence": "inferred", "source_ids": [3], "quote": "", "quote_check": "no_quote", "note": ""}
+  },
+  "phases": [
+    {
+      "name": "Create the app",
+      "summary": "",
+      "steps": [
+        {"title": "Sign up in the X developer console", "detail": "Accept the developer terms and describe your use case.", "who": "human", "why_human": "X login and accepting terms.", "url": "https://developer.x.com/en/portal/dashboard",
+          "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "The console refused automated access (HTTP 403), so the flow was not walked."},
+        {"title": "Enable OAuth 2.0 and pick 'Web App' (confidential client)", "detail": "Web App and Automated App/bot are confidential clients and get a client secret. Native and single-page apps are public clients.", "who": "human", "why_human": "Console login.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "Native App and Single page Apps are public clients and Web App and Automated App or bots are confidential clients.", "quote_check": "verified", "note": ""},
+        {"title": "Add the exact Composio callback URL", "detail": "X validates the redirect URI with exact matching.", "who": "human", "why_human": "Console login.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "For OAuth 2.0, you will need to have exact match validation for your callback URL.", "quote_check": "verified", "note": ""},
+        {"title": "Request offline.access with your scopes", "detail": "Without offline.access there is no refresh token, and access tokens last two hours.", "who": "agent", "why_human": "", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "If this scope is not passed, we will not generate a refresh token.", "quote_check": "verified", "note": ""}
+      ]
+    },
+    {
+      "name": "Pay for usage",
+      "summary": "",
+      "steps": [
+        {"title": "Add a card and buy credits", "detail": "Credits are deducted per request. Track usage in the Developer Console.", "who": "human", "why_human": "Payment.", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": "From a search snippet of docs.x.com."},
+        {"title": "Estimate cost per agent action", "detail": "Third-party breakdowns: about $0.005 per post read, $0.010 per user read, $0.015 per post created, $0.20 for a post with a URL, with reads capped at 3M a month on pay-per-use.", "who": "agent", "why_human": "", "url": "",
+          "evidence": "cited", "source_ids": [3, 4], "quote": "", "quote_check": "no_quote", "note": "Third-party sources only. Check the prices in your console."}
+      ]
+    }
+  ],
+  "requirements": [
+    {"title": "Payment method and prepaid credits", "detail": "Pay-per-usage, no subscriptions.", "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": ""}
+  ],
+  "gotchas": [
+    {"title": "Authorization codes expire in 30 seconds", "detail": "Exchange the code for a token immediately. Slow callbacks or queued workers will fail.", "evidence": "cited", "source_ids": [1], "quote": "The auth_code has a time limit of 30 seconds", "quote_check": "verified", "note": ""},
+    {"title": "Access tokens last 2 hours", "detail": "Unless you request offline.access and refresh.", "evidence": "cited", "source_ids": [1], "quote": "will only stay valid for two hours unless you’ve used the offline.access scope", "quote_check": "verified", "note": ""},
+    {"title": "Posts with links cost much more", "detail": "Third-party sources say a post containing a URL costs about 13x a plain post.", "evidence": "cited", "source_ids": [3], "quote": "", "quote_check": "no_quote", "note": "Third-party."}
+  ],
+  "blockers": [
+    {"title": "Cost at scale", "detail": "Read-heavy agents (monitoring, search) get expensive, and pay-per-use is capped at 3M post reads a month.", "workaround": "Cache aggressively, read only what you need, and contact X for Enterprise above the cap.", "evidence": "cited", "source_ids": [3, 4], "quote": "", "quote_check": "no_quote", "note": "Third-party sources."}
+  ],
+  "agent_can": [
+    "Estimate monthly API cost from your planned agent actions",
+    "Choose scopes and include offline.access",
+    "Check that the token exchange happens within 30 seconds of the callback"
+  ],
+  "human_must": [
+    "Create the developer account and accept the terms (the console refused automated access)",
+    "Add a payment method and buy credits",
+    "Set spending caps and auto-recharge limits"
+  ],
+  "conflicts": [
+    {"topic": "When pay-per-use replaced the tiers, and whether any free credit exists", "positions": "Third-party posts date the switch to February 2026. One mentions $20 of starter credit when you save a card. Others say there is no free tier.", "resolution": "Treat any free credit as a promotion. Check the console.", "source_ids": [3, 4]}
+  ],
+  "unknowns": [
+    "Exact current prices from an official page (docs.x.com refused automated fetch).",
+    "Whether X reviews developer use-case descriptions before granting access."
+  ],
+  "sources": [
+    {"id": 1, "url": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code", "title": "OAuth 2.0 Authorization Code Flow with PKCE - X", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 2, "url": "https://docs.x.com/x-api/getting-started/about-x-api", "title": "About the X API", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 3, "url": "https://bundle.social/blog/x-api-pricing-2026-costs-limits", "title": "X API pricing 2026: costs, limits, hidden charges", "kind": "third_party", "accessed": "2026-10-28"},
+    {"id": 4, "url": "https://twitterapi.io/blog/x-api-cost-breakdown-2026", "title": "What does the X (Twitter) API cost in 2026?", "kind": "third_party", "accessed": "2026-10-28"}
+  ],
+  "probes": [
+    {"check": "Developer console (where the agent stops)", "url": "https://developer.x.com/en/portal/dashboard", "outcome": "blocked", "result": "HTTP 403 for an automated client. A human must log in.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"},
+    {"check": "Pricing page fetch", "url": "https://docs.x.com/x-api/getting-started/about-x-api", "outcome": "blocked", "result": "HTTP 403 for an automated client, so pricing could not be read from the official page.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"}
+  ],
+  "audit": [
+    {"claim": "X needs a paid API tier (Basic/Pro subscription)", "status": "corrected", "method": "Search results for X API pricing, 2026.", "note": "The subscription tiers were replaced by pay-per-usage credits. The guide now describes credits and per-request costs.", "source_ids": [2, 3]},
+    {"claim": "Authorization code lifetime", "status": "verified", "method": "Fetched X's OAuth 2.0 docs on 2026-10-28.", "note": "30 seconds, which is unusually short.", "source_ids": [1]},
+    {"claim": "Per-request prices", "status": "unverified", "method": "Third-party sources only.", "note": "The official pricing page refused automated fetch.", "source_ids": [3, 4]}
+  ],
+  "pipeline_log": []
+}

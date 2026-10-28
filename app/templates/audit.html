@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Evidence audit | OAuth App Setup Guides{% endblock %}
+{% block content %}
+<section>
+  <h1>Evidence audit</h1>
+  <p class="lede">What was checked in the curated guides, how, and what changed as a result. The common view of
+  a provider's difficulty was wrong more than once. Those corrections are listed here.</p>
+
+  <h2>How checks were done</h2>
+  <ul>
+    <li><b>Doc fetch:</b> the provider page was fetched on the date shown and the quoted text found on it.
+    Claims checked this way are marked <span class="ev ev-cited">cited &#10003;</span>.</li>
+    <li><b>Search snippet only:</b> the claim appears in a search result excerpt from the page, but the full page
+    could not be fetched (often HTTP 403 for automated clients). Marked cited, without the check mark.</li>
+    <li><b>Live probe:</b> an HTTP request without credentials (discovery documents, console redirects).
+    Marked <span class="ev ev-tested">tested</span>.</li>
+    <li><b>Not done:</b> no developer account was created and no OAuth app was registered or submitted for review.
+    Hands-on times are estimates (<span class="ev ev-inferred">inferred</span>) until someone times a real setup.</li>
+  </ul>
+
+  {% set totals = namespace(v=0, c=0, u=0, x=0) %}
+  {% for g in curated %}{% for a in g.audit %}
+    {% if a.status == 'verified' %}{% set totals.v = totals.v + 1 %}{% elif a.status == 'corrected' %}{% set totals.c = totals.c + 1 %}{% elif a.status == 'conflict' %}{% set totals.x = totals.x + 1 %}{% else %}{% set totals.u = totals.u + 1 %}{% endif %}
+  {% endfor %}{% endfor %}
+  <p><span class="audit-verified">verified {{ totals.v }}</span> <span class="audit-corrected">corrected {{ totals.c }}</span>
+     <span class="audit-conflict">conflict {{ totals.x }}</span> <span class="audit-unverified">unverified {{ totals.u }}</span></p>
+
+  {% for g in curated %}
+  <h2><a href="/guides/{{ g.slug }}">{{ g.app_name }}</a> {{ m.tier(g.difficulty) }}</h2>
+  <table>
+    <tr><th>Claim</th><th>Status</th><th>How checked / what changed</th></tr>
+    {% for a in g.audit %}
+    <tr><td>{{ a.claim }}</td><td><span class="audit-{{ a.status }}">{{ a.status }}</span></td>
+      <td>{{ a.method }}{% if a.note %}<div class="small">{{ a.note }}</div>{% endif %}
+        {% for sid in a.source_ids %}{% set s = g.source(sid) %}{% if s %} {{ m.safe_link(s.url, '[' ~ sid ~ ']') }}{% endif %}{% endfor %}</td></tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+</section>
+{% endblock %}

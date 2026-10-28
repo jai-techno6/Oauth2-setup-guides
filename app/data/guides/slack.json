@@ -1,0 +1,123 @@
+{
+  "slug": "slack",
+  "app_name": "Slack",
+  "app_url": "https://slack.com",
+  "aliases": ["slack", "slack.com", "slack api", "slack app"],
+  "origin": "curated",
+  "generated_at": "2026-10-28",
+  "model": "curated",
+  "summary": "Hard for AI agents that read messages, even though creating the app is self-serve. Slack's 2025 terms make the Marketplace the only approved channel for commercial distribution. Unlisted commercial apps are limited to 1 request per minute (15 messages) on conversations.history and conversations.replies. Marketplace listing needs 10 active workspace installs and a review of up to about 10 weeks. Build and test in your own workspace now, and plan the Marketplace submission early.",
+  "oauth_support": "yes",
+  "oauth_support_claim": {"text": "Slack apps install via OAuth 2.0 (Slack 'V2' OAuth with granular bot and user scopes).", "evidence": "cited", "source_ids": [1], "quote": "you must upgrade your OAuth flow to use the Slack V2 of OAuth 2.0", "quote_check": "verified", "note": ""},
+  "difficulty": "hard",
+  "difficulty_claim": {
+    "text": "The app itself is self-serve, but commercial distribution outside the Marketplace runs at Tier 1 rate limits for message history. Marketplace approval has install prerequisites and a multi-week review.",
+    "evidence": "cited", "source_ids": [2],
+    "quote": "the Slack Marketplace is the only appropriate channel for commercially distributing apps built with Slack APIs",
+    "quote_check": "verified",
+    "note": "Often listed as 'moderate'. This guide rates it hard for agents that read conversations. Write-only bots and apps used only inside your own company are closer to moderate."
+  },
+  "composio": {
+    "status": "managed",
+    "claim": {"text": "Composio names Slack among toolkits with a Composio-managed OAuth app.", "evidence": "cited", "source_ids": [5], "quote": "Composio registers and maintains OAuth apps for popular toolkits such as GitHub, Gmail, and Slack.", "quote_check": "verified",
+      "note": "Not checked: whether Composio's managed Slack app is Marketplace-listed, which decides the rate limits your users get."}
+  },
+  "endpoints": {
+    "developer_console_url": "https://api.slack.com/apps",
+    "docs_url": "https://docs.slack.dev/authentication/installing-with-oauth",
+    "authorization_url": "https://slack.com/oauth/v2/authorize",
+    "token_url": "https://slack.com/api/oauth.v2.access",
+    "evidence": "inferred",
+    "note": "Standard Slack V2 OAuth endpoints. Slack refused our automated requests (HTTP 403), so they were not tested live."
+  },
+  "time": {
+    "hands_on": {"text": "20-45 minutes to a working app in your own workspace", "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Estimated: create the app, add scopes, set the redirect URL, enable distribution, install."},
+    "approval_wait": {"text": "Marketplace: preliminary review up to 10 business days, then functional review up to 10 weeks. You first need 10 active workspace installs.", "evidence": "cited", "source_ids": [1],
+      "quote": "the functional review takes up to 10 weeks for new submissions", "quote_check": "verified", "note": "In the preliminary stage your place in the queue resets each time you resubmit."},
+    "fastest_path": {"text": "Internal apps in your own workspace keep normal rate limits (50+ requests/min, 1,000 messages). Unlisted distribution works right away for development and pilots.", "evidence": "cited", "source_ids": [2],
+      "quote": "Internal customer-built applications are not impacted by these changes", "quote_check": "verified", "note": ""}
+  },
+  "phases": [
+    {
+      "name": "Create the app",
+      "summary": "Self-serve, same day.",
+      "steps": [
+        {"title": "Create an app at api.slack.com/apps (from a manifest if you like)", "detail": "Pick a development workspace. A manifest (YAML/JSON) keeps scopes and redirect URLs in code, so you can keep a staging copy in sync.", "who": "human", "why_human": "Requires Slack login.", "url": "https://api.slack.com/apps",
+          "evidence": "cited", "source_ids": [1], "quote": "You can create a copy of your app for dev/staging using your published app’s manifest.", "quote_check": "verified", "note": ""},
+        {"title": "Choose minimal bot/user scopes", "detail": "List the API methods you call and pick only their scopes. Prefer bot tokens. Avoid legacy and broad scopes that the Marketplace rejects (e.g. admin.*, search:read, identity.*).", "who": "agent", "why_human": "", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "use only the absolute minimum number of scopes for your app to work", "quote_check": "verified", "note": ""},
+        {"title": "Add the redirect URL from Composio and enable public distribution", "detail": "OAuth & Permissions > Redirect URLs: paste your Composio callback. Manage Distribution > activate public distribution so other workspaces can install.", "who": "human", "why_human": "Console login.", "url": "",
+          "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Standard Slack console flow. Not walked by the agent (HTTP 403)."},
+        {"title": "Install to your workspace and test", "detail": "Install, connect through Composio, and check the token types and scopes you receive.", "who": "human", "why_human": "Workspace install consent.", "url": "",
+          "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": ""}
+      ]
+    },
+    {
+      "name": "Reach 10 active workspaces",
+      "summary": "Required before you can submit to the Marketplace.",
+      "steps": [
+        {"title": "Get design partners to install the unlisted app", "detail": "10 or more workspaces must be active in the past 28 days. Expect Tier 1 limits on history and replies for these new installs.", "who": "human", "why_human": "Customer relationships.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "Your app has been installed on 10 or more active workspaces", "quote_check": "verified", "note": ""}
+      ]
+    },
+    {
+      "name": "Marketplace review",
+      "summary": "Weeks. Your live app is locked once listed.",
+      "steps": [
+        {"title": "Prepare the listing, test accounts and a demo video", "detail": "Reviewers need a way to install the app themselves and test credentials (with dummy data) for your service. A video of install, OAuth, setup, use and uninstall speeds review.", "who": "either", "why_human": "Test accounts and the recording come from you.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "provide us with test account credentials needed to access your service", "quote_check": "verified", "note": "An agent can draft the listing copy and the video script."},
+        {"title": "Submit and answer feedback", "detail": "Preliminary review is up to 10 business days, functional review up to 10 weeks for new apps. You cannot pay or ask to speed it up.", "who": "human", "why_human": "Submission and responses come from the app owner.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "We are unable to skip or accelerate the review process", "quote_check": "verified", "note": ""},
+        {"title": "Keep a staging app for future scope changes", "detail": "Once you are listed, adding scopes needs a new review, and new scopes do not work until approved.", "who": "agent", "why_human": "", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "the live version of your app is locked", "quote_check": "verified", "note": ""}
+      ]
+    }
+  ],
+  "requirements": [
+    {"title": "10 active workspace installs before Marketplace submission", "detail": "Active means used in the past 28 days. Apps below this cannot submit.", "evidence": "cited", "source_ids": [1], "quote": "apps that do not meet this requirement will be blocked from submitting to the Marketplace", "quote_check": "verified", "note": ""},
+    {"title": "HTTPS redirect URL", "detail": "Use the exact Composio callback.", "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Not verified against Slack docs in this pass."}
+  ],
+  "gotchas": [
+    {"title": "1 request/minute on conversations.history and replies for unlisted commercial apps", "detail": "Apps created after May 29, 2025, and new installs of older unlisted apps, get Tier 1 limits with at most 15 objects per call. Agents that summarize channels will stall.", "evidence": "cited", "source_ids": [2], "quote": "The new rate limits will be updated to allow 1 request per minute and will return a maximum of 15 objects per request.", "quote_check": "verified", "note": ""},
+    {"title": "Resubmitting resets your place in the queue", "detail": "During preliminary review, each resubmission starts the timeline over. Read the guidelines before you submit.", "evidence": "cited", "source_ids": [1], "quote": "your place in the queue is reset each time you resubmit", "quote_check": "verified", "note": ""},
+    {"title": "Marketplace rejects scopes for unbuilt features", "detail": "Only request scopes for features reviewers can test now.", "evidence": "cited", "source_ids": [1], "quote": "Please do not submit your app with scopes for a feature that you plan to build at some point in future.", "quote_check": "verified", "note": ""}
+  ],
+  "blockers": [
+    {"title": "Reading message history at scale without a listing", "detail": "Tier 1 limits make bulk reading impractical for new commercial installs.", "workaround": "Use the Events API for new messages instead of polling history. Run it as an internal app per customer only if your terms allow. Ask about the Real-time Search API (limited partner beta).", "evidence": "cited", "source_ids": [2], "quote": "consider the other ways the platform may provide to get the kind of focused, contextual information an app typically requires, such as the Events API", "quote_check": "verified", "note": ""},
+    {"title": "Some app types are not accepted on the Marketplace", "detail": "Coded workflows are not eligible, and Slack lists other excluded categories.", "workaround": "Check the guidelines before building around a listing.", "evidence": "cited", "source_ids": [1], "quote": "Coded workflows are currently not eligible for listing in the Slack Marketplace.", "quote_check": "verified", "note": ""}
+  ],
+  "agent_can": [
+    "Generate the app manifest with minimal scopes and redirect URLs",
+    "Check planned API calls against the Tier 1 limits and suggest Events API alternatives",
+    "Draft the Marketplace listing, scope justifications and demo video script"
+  ],
+  "human_must": [
+    "Log in at api.slack.com/apps (the agent was refused with HTTP 403)",
+    "Install to workspaces and recruit 10 active workspaces",
+    "Provide reviewers with test accounts, submit, and answer feedback"
+  ],
+  "conflicts": [
+    {"topic": "Are existing unlisted installs affected?", "positions": "Slack's changelog says existing installs of unlisted apps keep their limits. A third-party issue tracker says existing installs became subject to the limits on March 3, 2026.", "resolution": "Unresolved. Check Slack's latest changelog. The official page we fetched does not mention a 2026 date.", "source_ids": [2, 4]}
+  ],
+  "unknowns": [
+    "Whether Composio's managed Slack app is Marketplace-listed (which decides its rate limits).",
+    "Current actual review times; Slack shows an estimate on the submission page."
+  ],
+  "sources": [
+    {"id": 1, "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide", "title": "Slack Marketplace review process - Slack Developer Docs", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 2, "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps", "title": "Rate limit changes for non-Marketplace apps - Slack changelog", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 4, "url": "https://github.com/zeroclaw-labs/zeroclaw/issues/1839", "title": "Handle Slack conversations.history rate limiting (GitHub issue)", "kind": "third_party", "accessed": "2026-10-28"},
+    {"id": 5, "url": "https://docs.composio.dev/docs/managed-auth", "title": "Managed vs custom auth - Composio Docs", "kind": "composio", "accessed": "2026-10-28"}
+  ],
+  "probes": [
+    {"check": "Developer console (where the agent stops)", "url": "https://api.slack.com/apps", "outcome": "blocked", "result": "HTTP 403 for an automated client. A human needs a real browser session to create the app.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"},
+    {"check": "OAuth/OpenID discovery", "url": "https://slack.com/.well-known/openid-configuration", "outcome": "blocked", "result": "HTTP 403 for an automated client.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"}
+  ],
+  "audit": [
+    {"claim": "Slack is 'moderate': self-serve with an optional directory review", "status": "corrected", "method": "Fetched Slack's 2025 rate-limit changelog and Marketplace review guide on 2026-10-28.", "note": "Changed to hard for agents that read messages. Unlisted commercial apps get 1 req/min on history, and listing needs 10 active workspaces plus up to ~10 weeks of review.", "source_ids": [1, 2]},
+    {"claim": "Marketplace review takes up to 10 weeks", "status": "verified", "method": "Fetched the review guide.", "note": "Preliminary review is up to 10 business days, functional review up to 10 weeks (6 for updates).", "source_ids": [1]},
+    {"claim": "Existing unlisted installs are now also rate-limited", "status": "conflict", "method": "Official changelog vs. third-party issue.", "note": "Left as a conflict.", "source_ids": [2, 4]},
+    {"claim": "Slack OAuth endpoints", "status": "unverified", "method": "Probe refused (HTTP 403).", "note": "Endpoints are labelled inferred, not tested.", "source_ids": []}
+  ],
+  "pipeline_log": []
+}

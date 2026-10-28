@@ -1,0 +1,28 @@
+{% macro tier(t) -%}
+<span class="tier tier-{{ t }}">{{ TIER_INFO.get(t, TIER_INFO['unknown']).label }}</span>
+{%- endmacro %}
+
+{% macro safe_link(url, text=None) -%}
+{%- if url and (url.startswith('https://') or url.startswith('http://')) -%}
+<a href="{{ url }}" target="_blank" rel="noopener noreferrer nofollow">{{ text or url }}</a>
+{%- elif url -%}{{ text or url }}{%- endif -%}
+{%- endmacro %}
+
+{% macro ev(g, item) -%}
+<span class="ev ev-{{ item.evidence }}" title="{{ {'tested':'Observed by a check we ran','cited':'Stated by a linked source','inferred':'Reasoning; no source states this','unknown':'Could not determine'}[item.evidence] }}">{{ item.evidence }}{% if item.evidence == 'cited' and item.quote_check == 'verified' %} &#10003;{% endif %}</span>
+{%- for sid in item.source_ids -%}
+  {%- set s = g.source(sid) -%}
+  {%- if s %}<a class="ref ref-{{ s.kind }}" href="#src-{{ sid }}" title="{{ s.title or s.url }}">[{{ sid }}]</a>{% endif -%}
+{%- endfor -%}
+{%- if item.quote or item.note %}
+<details class="evd"><summary>{{ "show quote" if item.quote else "note" }}</summary>
+  {% if item.quote %}<blockquote>&ldquo;{{ item.quote }}&rdquo;</blockquote>
+    <div class="qc qc-{{ item.quote_check }}">{{ {'verified':'Quote found on the cited page.','not_found':'Quote NOT found on the cited page.','not_checked':'Quote not machine-checked.','no_quote':''}[item.quote_check] }}</div>{% endif %}
+  {% if item.note %}<div class="note">{{ item.note }}</div>{% endif %}
+</details>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro who(w) -%}
+<span class="who who-{{ w }}">{{ {'agent':'Agent','human':'You','either':'Agent or you'}[w] }}</span>
+{%- endmacro %}

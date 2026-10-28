@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}{{ g.app_name }} OAuth app setup: {{ g.tier_label() }} | OAuth App Setup Guides{% endblock %}
+{% block meta %}
+<meta name="description" content="{{ g.summary|truncate(200) }}">
+<meta property="og:title" content="{{ g.app_name }} OAuth app setup: {{ g.tier_label() }}">
+<meta property="og:description" content="Hands-on: {{ g.time.hands_on.text }}. Approval: {{ g.time.approval_wait.text }}.">
+{% endblock %}
+{% block content %}
+{% set counts = g.evidence_counts() %}
+{% set total = counts.values()|sum %}
+<article class="guide" data-slug="{{ g.slug }}">
+  <header class="guide-head">
+    <div>
+      <h1>{{ g.app_name }} <span class="muted small">OAuth app setup</span></h1>
+      <div class="meta">
+        {{ m.tier(g.difficulty) }}
+        <span class="pill">OAuth for third parties: <b>{{ g.oauth_support }}</b></span>
+        {% if g.origin == 'curated' %}
+          <span class="pill pill-curated">Curated, checked {{ g.generated_at }}</span>
+        {% else %}
+          <span class="pill pill-agent">Agent-generated {{ g.generated_at }} &middot; {{ g.model }}</span>
+        {% endif %}
+        <span class="pill conf conf-{{ g.confidence() }}">Confidence: {{ g.confidence() }}</span>
+      </div>
+      {% if g.app_url %}<div class="muted small">{{ m.safe_link(g.app_url) }}</div>{% endif %}
+    </div>
+    <div class="share">
+      <button type="button" id="copy-link" data-url="{{ base_url }}/guides/{{ g.slug }}">Copy link</button>
+      <button type="button" id="copy-md" data-src="/guides/{{ g.slug }}/md">Copy as Markdown</button>
+      <a href="/guides/{{ g.slug }}/md" class="btn-link">Markdown</a>
+      <a href="/api/guides/{{ g.slug }}" class="btn-link">JSON</a>
+      <button type="button" onclick="window.print()">Print</button>
+    </div>
+  </header>
+
+  <div class="evbar" title="Evidence mix across {{ total }} claims">
+    {% for k in EVIDENCE_ORDER %}{% if counts[k] %}<span class="seg seg-{{ k }}" style="flex: {{ counts[k] }}">{{ counts[k] }} {{ k }}</span>{% endif %}{% endfor %}
+  </div>
+
+  <section class="bottomline">
+    <p class="summary">{{ g.summary }}</p>
+    <p class="why"><b>Why {{ g.tier_label()|lower }}:</b> {{ g.difficulty_claim.text }} {{ m.ev(g, g.difficulty_claim) }}</p>
+  </section>
+
+  <section class="grid3">
+    <div class="stat"><div class="stat-label">Hands-on effort</div><div class="stat-val">{{ g.time.hands_on.text }}</div>{{ m.ev(g, g.time.hands_on) }}</div>
+    <div class="stat"><div class="stat-label">Waiting on the provider</div><div class="stat-val">{{ g.time.approval_wait.text }}</div>{{ m.ev(g, g.time.approval_wait) }}</div>
+    <div class="stat"><div class="stat-label">Fastest way to start</div><div class="stat-val small">{{ g.time.fastest_path.text }}</div>{{ m.ev(g, g.time.fastest_path) }}</div>
+  </section>
+
+  <section class="composio composio-{{ g.composio.status }}">
+    <h2>Do you need your own OAuth app?</h2>
+    <p><b>{{ {'managed':'Composio-managed OAuth is available.','byo_required':'You must bring your own OAuth app.','unknown':'Not confirmed for Composio.'}[g.composio.status] }}</b>
+    {{ g.composio.claim.text }} {{ m.ev(g, g.composio.claim) }}</p>
+    <p class="muted small">With a managed app your users see &ldquo;Composio&rdquo; on the consent screen and share its rate limits.
+    You still need your own app for your brand on the consent screen, custom scopes, or a dedicated quota.</p>
+  </section>
+
+  <section class="split">
+    <div class="col">
+      <h2>The agent can</h2>
+      <ul>{% for x in g.agent_can %}<li>{{ x }}</li>{% else %}<li class="muted">Nothing listed.</li>{% endfor %}</ul>
+    </div>
+    <div class="col">
+      <h2>You take over</h2>
+      <ul>{% for x in g.human_must %}<li>{{ x }}</li>{% else %}<li class="muted">Nothing listed.</li>{% endfor %}</ul>
+      {% if g.walls() %}
+      <h3>Where the agent was stopped <span class="ev ev-tested">tested</span></h3>
+      <ul>{% for p in g.walls() %}<li>{{ p.result }} <span class="muted small">{{ m.safe_link(p.url, p.url|truncate(60)) }} &middot; {{ p.checked_at }}</span></li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if g.endpoints.developer_console_url or g.endpoints.authorization_url %}
+  <section class="endpoints">
+    <h2>Key URLs</h2>
+    <table>
+      {% if g.endpoints.developer_console_url %}<tr><th>Developer console</th><td>{{ m.safe_link(g.endpoints.developer_console_url) }}</td></tr>{% endif %}
+      {% if g.endpoints.docs_url %}<tr><th>OAuth docs</th><td>{{ m.safe_link(g.endpoints.docs_url) }}</td></tr>{% endif %}
+      {% if g.endpoints.authorization_url %}<tr><th>Authorization URL</th><td><code>{{ g.endpoints.authorization_url }}</code></td></tr>{% endif %}
+      {% if g.endpoints.token_url %}<tr><th>Token URL</th><td><code>{{ g.endpoints.token_url }}</code></td></tr>{% endif %}
+    </table>
+    <p class="small"><span class="ev ev-{{ g.endpoints.evidence }}">{{ g.endpoints.evidence }}</span> {{ g.endpoints.note }}</p>
+  </section>
+  {% endif %}
+
+  <section class="steps">
+    <h2>Step-by-step checklist</h2>
+    <p class="muted small">Ticks are saved in this browser only.</p>
+    {% set ns = namespace(n=0) %}
+    {% for phase in g.phases %}
+    <h3>{{ loop.index }}. {{ phase.name }}</h3>
+    {% if phase.summary %}<p class="muted">{{ phase.summary }}</p>{% endif %}
+    <ol class="checklist">
+      {% for s in phase.steps %}{% set ns.n = ns.n + 1 %}
+      <li>
+        <label><input type="checkbox" data-step="{{ ns.n }}"> <b>{{ s.title }}</b></label> {{ m.who(s.who) }}
+        <div class="step-detail">{{ s.detail }}
+          {% if s.who != 'agent' and s.why_human %}<div class="why-human">Why you: {{ s.why_human }}</div>{% endif %}
+          {% if s.url %}<div>{{ m.safe_link(s.url, s.url|truncate(80)) }}</div>{% endif %}
+          {{ m.ev(g, s) }}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% endfor %}
+  </section>
+
+  {% for title, items, cls in [('Requirements', g.requirements, 'req'), ('Gotchas', g.gotchas, 'gotcha')] %}
+  {% if items %}
+  <section class="items items-{{ cls }}">
+    <h2>{{ title }}</h2>
+    <ul>{% for i in items %}<li><b>{{ i.title }}.</b> {{ i.detail }} {{ m.ev(g, i) }}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+  {% endfor %}
+
+  {% if g.blockers %}
+  <section class="items items-blocker">
+    <h2>Blockers and workarounds</h2>
+    <ul>{% for b in g.blockers %}<li><b>{{ b.title }}.</b> {{ b.detail }}
+      {% if b.workaround %}<div class="workaround">Workaround: {{ b.workaround }}</div>{% endif %} {{ m.ev(g, b) }}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+
+  {% if g.conflicts or g.unknowns %}
+  <section class="uncertain">
+    <h2>Uncertain</h2>
+    {% if g.conflicts %}<h3>Where sources disagree</h3>
+    <ul>{% for c in g.conflicts %}<li><b>{{ c.topic }}:</b> {{ c.positions }} {% if c.resolution %}<i>{{ c.resolution }}</i>{% endif %}
+      {% for sid in c.source_ids %}<a class="ref" href="#src-{{ sid }}">[{{ sid }}]</a>{% endfor %}</li>{% endfor %}</ul>{% endif %}
+    {% if g.unknowns %}<h3>Still unknown</h3><ul>{% for u in g.unknowns %}<li>{{ u }}</li>{% endfor %}</ul>{% endif %}
+  </section>
+  {% endif %}
+
+  {% if g.probes %}
+  <section class="probes">
+    <h2>What was tested</h2>
+    <table>
+      <tr><th>Check</th><th>Outcome</th><th>Result</th></tr>
+      {% for p in g.probes %}
+      <tr><td>{{ p.check }}<div class="muted small">{{ m.safe_link(p.url, p.url|truncate(60)) }}</div></td>
+        <td><span class="outcome outcome-{{ p.outcome }}">{{ p.outcome }}</span></td>
+        <td>{{ p.result }}<div class="muted small">{{ p.method }} &middot; {{ p.checked_at }}</div></td></tr>
+      {% endfor %}
+    </table>
+  </section>
+  {% endif %}
+
+  {% if g.audit %}
+  <section class="audit">
+    <h2>Spot-check log</h2>
+    <table>
+      <tr><th>Claim</th><th>Status</th><th>How checked / what changed</th></tr>
+      {% for a in g.audit %}
+      <tr><td>{{ a.claim }}</td><td><span class="audit-{{ a.status }}">{{ a.status }}</span></td>
+        <td>{{ a.method }}{% if a.note %}<div class="small">{{ a.note }}</div>{% endif %}
+          {% for sid in a.source_ids %}<a class="ref" href="#src-{{ sid }}">[{{ sid }}]</a>{% endfor %}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+  {% endif %}
+
+  <section class="sources">
+    <h2>Sources</h2>
+    <ol>
+      {% for s in g.sources %}
+      <li id="src-{{ s.id }}" value="{{ s.id }}"><span class="kind kind-{{ s.kind }}">{{ {'official':'official','third_party':'third-party','composio':'Composio','probe':'live check'}[s.kind] }}</span>
+        {{ m.safe_link(s.url, s.title or s.url) }} <span class="muted small">accessed {{ s.accessed }}</span></li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  {% if g.pipeline_log %}
+  <details class="log"><summary>Agent run log</summary><pre>{{ g.pipeline_log|join('\n') }}</pre></details>
+  {% endif %}
+
+  {% if g.origin == 'agent' %}
+  <p class="muted small">This guide was generated live from public sources and has not been reviewed by a person.
+  Use the evidence labels: anything not <b>tested</b> or <b>cited</b> needs checking before you plan around it.</p>
+  <button type="button" id="regen" data-query="{{ g.query or g.app_name }}">Regenerate with fresh research</button>
+  <p id="gen-msg" class="msg" role="status"></p>
+  {% endif %}
+</article>
+{% endblock %}
+{% block scripts %}<script src="/static/app.js"></script>{% endblock %}

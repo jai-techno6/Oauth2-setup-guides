@@ -1,0 +1,122 @@
+{
+  "slug": "hubspot",
+  "app_name": "HubSpot",
+  "app_url": "https://www.hubspot.com",
+  "aliases": ["hubspot", "hubspot.com", "hubspot crm"],
+  "origin": "curated",
+  "generated_at": "2026-10-28",
+  "model": "curated",
+  "summary": "Moderate. You can build a HubSpot OAuth app self-serve on the developer platform, usually through the HubSpot CLI. Install caps are what slow you down: a privately distributed app reaches 10 customer accounts, and a marketplace-distribution app reaches 25 until its Marketplace listing is approved. Listing needs 3 active installs and a review of up to about 60 days.",
+  "oauth_support": "yes",
+  "oauth_support_claim": {"text": "HubSpot apps that are distributed to multiple accounts must use OAuth.", "evidence": "cited", "source_ids": [2], "quote": "your app must use OAuth as its sole authorization method", "quote_check": "verified", "note": "This is a Marketplace listing requirement."},
+  "difficulty": "moderate",
+  "difficulty_claim": {
+    "text": "Creating the app is self-serve. Scaling past 10 (private) or 25 (marketplace distribution) customer accounts requires Marketplace listing approval.",
+    "evidence": "cited", "source_ids": [1],
+    "quote": "apps that are created or migrated to version 2025.2 are capped at 25 installs until they are listed on the HubSpot Marketplace",
+    "quote_check": "verified", "note": ""
+  },
+  "composio": {
+    "status": "unknown",
+    "claim": {"text": "Composio publishes a HubSpot OAuth setup guide for bringing your own app. This pass did not confirm whether a Composio-managed HubSpot app exists.", "evidence": "unknown", "source_ids": [6], "quote": "", "quote_check": "no_quote",
+      "note": "Set COMPOSIO_API_KEY and regenerate to check the live catalog."}
+  },
+  "endpoints": {
+    "developer_console_url": "https://developers.hubspot.com/",
+    "docs_url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/oauth/working-with-oauth",
+    "authorization_url": "https://app.hubspot.com/oauth/authorize",
+    "token_url": "https://api.hubapi.com/oauth/v1/token",
+    "evidence": "inferred",
+    "note": "Long-standing HubSpot endpoints, not re-checked in this pass. Confirm them against the OAuth docs link."
+  },
+  "time": {
+    "hands_on": {"text": "1-2 hours (developer account, CLI install, project, redirect URLs)", "evidence": "inferred", "source_ids": [4], "quote": "", "quote_check": "no_quote", "note": "The CLI path needs Node.js 20+ and a personal access key."},
+    "approval_wait": {"text": "None for up to 10 private / 25 marketplace-distribution installs. Listing: initial review within 10 business days, whole process up to about 60 days after feedback.", "evidence": "cited", "source_ids": [2],
+      "quote": "The entire app review and feedback process should take no more than 60 days from the time feedback is shared.", "quote_check": "verified", "note": ""},
+    "fastest_path": {"text": "Start with private distribution (up to 10 customer accounts, 100 for Solutions Partners). You can switch to marketplace distribution later without breaking installs.", "evidence": "cited", "source_ids": [1],
+      "quote": "You can also start with a private distribution project-based app and switch it to marketplace distribution later without interrupting existing installs", "quote_check": "verified", "note": ""}
+  },
+  "phases": [
+    {
+      "name": "Create the app",
+      "summary": "Self-serve.",
+      "steps": [
+        {"title": "Create a HubSpot developer account", "detail": "Use a developer account, not your production CRM portal, and create a test account for installs.", "who": "human", "why_human": "Account signup and email verification.", "url": "https://developers.hubspot.com/",
+          "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": ""},
+        {"title": "Install the HubSpot CLI and authenticate", "detail": "npm install -g @hubspot/cli, then hs account auth with a personal access key.", "who": "either", "why_human": "Generating the personal access key needs your HubSpot login.", "url": "",
+          "evidence": "cited", "source_ids": [4], "quote": "", "quote_check": "no_quote", "note": "From a third-party (Microsoft Databricks) setup guide that reflects the current HubSpot platform."},
+        {"title": "Create an OAuth project app", "detail": "hs project create --project-base app --auth oauth --distribution private (or marketplace). Set auth.redirectUrls in app-hsmeta.json to your Composio callback, then upload the project.", "who": "agent", "why_human": "", "url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/create-an-app",
+          "evidence": "cited", "source_ids": [3, 4], "quote": "", "quote_check": "no_quote", "note": "An agent can generate the project config. A person runs the upload with their own credentials."},
+        {"title": "Sign the Acceptable Use Policy", "detail": "Developers report installs failing with 'the app developer has not signed the acceptable use policy' until it is signed.", "who": "human", "why_human": "Legal acceptance.", "url": "",
+          "evidence": "cited", "source_ids": [5], "quote": "", "quote_check": "no_quote", "note": "Community forum report, not official docs."}
+      ]
+    },
+    {
+      "name": "Distribute",
+      "summary": "",
+      "steps": [
+        {"title": "Allowlist or install into customer accounts", "detail": "Private distribution: up to 10 customer accounts (100 for Solutions Partners). Marketplace distribution: up to 25 installs before listing.", "who": "human", "why_human": "Customer accounts must authorize.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "app partners can distribute apps privately via OAuth to up to 10 customers or 100 for Solution Partners", "quote_check": "verified", "note": ""}
+      ]
+    },
+    {
+      "name": "Marketplace listing (to scale past the caps)",
+      "summary": "",
+      "steps": [
+        {"title": "Reach 3 active installs from unaffiliated accounts", "detail": "'Active' means successful OAuth API calls or webhook activity in the past 30 days, from production accounts outside your organization.", "who": "human", "why_human": "Customer relationships.", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "your app must have at least three active, unique installs", "quote_check": "verified", "note": ""},
+        {"title": "Prepare the listing: setup docs, demo video, pricing, shared-data table", "detail": "All URLs must be live and crawlable. The pricing must match your website, and the shared-data table must match your scopes.", "who": "either", "why_human": "Publishing pages and the video.", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "All URLs in your HubSpot Marketplace listing must lead to live, publicly available, and functional pages.", "quote_check": "verified", "note": "An agent can draft the setup docs and shared-data table."},
+        {"title": "Agree to the Technology Partner Program Agreement and submit", "detail": "HubSpot's Ecosystem Quality team reviews the listing manually.", "who": "human", "why_human": "Legal agreement.", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": ""}
+      ]
+    }
+  ],
+  "requirements": [
+    {"title": "OAuth only, single app ID", "detail": "A listed app must authorize with the public app ID tied to its listing and use OAuth as its sole method.", "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": ""},
+    {"title": "AI connectors need user-level permissions", "detail": "An app that mainly connects HubSpot to generative AI tools must use user-level access or HubSpot's MCP server.", "evidence": "cited", "source_ids": [2], "quote": "if your app is an AI connector", "quote_check": "verified", "note": "This applies directly to agent builders."}
+  ],
+  "gotchas": [
+    {"title": "Legacy apps over 25 installs get capped on migration", "detail": "Migrating an older public app to the 2025.2 platform enforces the cap automatically.", "evidence": "cited", "source_ids": [1], "quote": "the install limit will be automatically enforced", "quote_check": "verified", "note": ""},
+    {"title": "Unused scopes get rejected", "detail": "Remove scopes you do not use, or mark them conditionally required or optional.", "evidence": "cited", "source_ids": [2], "quote": "Scopes that are not used must be removed.", "quote_check": "verified", "note": ""},
+    {"title": "Allowlist the HubSpot crawler", "detail": "HubSpot crawls your listing URLs during review. Blocking its crawler delays review.", "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": ""}
+  ],
+  "blockers": [
+    {"title": "Install cap before listing", "detail": "Your 11th private customer, or 26th marketplace-distribution install, is blocked until you are listed.", "workaround": "Start the listing once you have 3 active external installs. Solutions Partners get 100 private installs.", "evidence": "cited", "source_ids": [1], "quote": "", "quote_check": "no_quote", "note": ""}
+  ],
+  "agent_can": [
+    "Generate the HubSpot project and app-hsmeta.json with redirect URLs and minimal scopes",
+    "Draft setup documentation, the shared-data table and the listing copy",
+    "Track active-install counts against the 3-install and 25-install thresholds"
+  ],
+  "human_must": [
+    "Create the developer account and personal access key",
+    "Sign the Acceptable Use Policy and the Technology Partner Program Agreement",
+    "Recruit 3 unaffiliated active installs and record the demo video"
+  ],
+  "conflicts": [
+    {"topic": "Can you still create an app in the web UI?", "positions": "A Microsoft Databricks guide says HubSpot retired the legacy public app creation UI. Other third-party connector docs still describe a legacy web-interface path.", "resolution": "Use the CLI project path, which HubSpot documents as current.", "source_ids": [3, 4]}
+  ],
+  "unknowns": [
+    "Whether Composio offers a managed HubSpot OAuth app.",
+    "HubSpot authorize/token endpoints were not re-checked live in this pass."
+  ],
+  "sources": [
+    {"id": 1, "url": "https://developers.hubspot.com/changelog/new-marketplace-distribution-app-install-limits", "title": "New Marketplace Distribution App Install Limits - HubSpot changelog", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 2, "url": "https://developers.hubspot.com/docs/apps/developer-platform/list-apps/listing-your-app/app-marketplace-listing-requirements", "title": "App listing requirements in the HubSpot Marketplace", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 3, "url": "https://developers.hubspot.com/docs/apps/developer-platform/build-apps/create-an-app", "title": "Create a new app using the CLI - HubSpot docs", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 4, "url": "https://learn.microsoft.com/en-us/azure/databricks/ingestion/lakeflow-connect/hubspot-source-setup", "title": "Configure OAuth for HubSpot ingestion - Azure Databricks", "kind": "third_party", "accessed": "2026-10-28"},
+    {"id": 5, "url": "https://community.hubspot.com/t/installation-app-failure/155107", "title": "Installation app failure - HubSpot Community", "kind": "third_party", "accessed": "2026-10-28"},
+    {"id": 6, "url": "https://docs.composio.dev/docs/managed-auth", "title": "Managed vs custom auth - Composio Docs", "kind": "composio", "accessed": "2026-10-28"}
+  ],
+  "probes": [
+    {"check": "Developer console (where the agent stops)", "url": "https://app.hubspot.com/developer", "outcome": "blocked", "result": "The page returned no readable content to an automated client (JavaScript app shell). A human needs a logged-in browser.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"}
+  ],
+  "audit": [
+    {"claim": "HubSpot is moderate: self-serve, marketplace listing needs review", "status": "verified", "method": "Fetched HubSpot's listing requirements and install-limit changelog on 2026-10-28.", "note": "Added the install caps (10 private / 25 marketplace) as the real limit, not the listing itself.", "source_ids": [1, 2]},
+    {"claim": "Marketplace listing requires 3 active installs", "status": "verified", "method": "Fetched listing requirements.", "note": "'Active' was tightened: unaffiliated production accounts with activity in the past 30 days.", "source_ids": [2]},
+    {"claim": "Apps are created in a web UI", "status": "corrected", "method": "HubSpot CLI docs plus a Databricks guide.", "note": "The current platform is CLI and project based. Whether the legacy UI is fully retired is a conflict between third-party sources.", "source_ids": [3, 4]},
+    {"claim": "HubSpot OAuth endpoints", "status": "unverified", "method": "Not probed in this pass.", "note": "Labelled inferred.", "source_ids": []}
+  ],
+  "pipeline_log": []
+}

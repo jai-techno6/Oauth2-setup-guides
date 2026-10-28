@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Researching {{ job.query }} | OAuth App Setup Guides{% endblock %}
+{% block content %}
+<section class="job" id="job" data-job="{{ job.id }}">
+  <h1>Researching <span class="q">{{ job.query }}</span></h1>
+  <p class="muted">The agent searches provider docs, writes the guide into a fixed schema, tests endpoints and the
+  developer console without credentials, then checks its quotes against the cited pages. This usually takes 1&ndash;3 minutes.</p>
+  <ol class="stages">
+    <li data-stage="research">Research (web search, 3 topics in parallel)</li>
+    <li data-stage="synthesize">Write the guide</li>
+    <li data-stage="probe">Test endpoints and console</li>
+    <li data-stage="verify">Verify quotes against sources</li>
+    <li data-stage="done">Done</li>
+  </ol>
+  <div class="progress-log" id="log" aria-live="polite"></div>
+  <p id="job-result" class="msg"></p>
+  <noscript>JavaScript is needed to stream progress. Status: <a href="/api/jobs/{{ job.id }}">/api/jobs/{{ job.id }}</a></noscript>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/app.js"></script>{% endblock %}

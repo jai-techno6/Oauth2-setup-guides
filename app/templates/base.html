@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}OAuth App Setup Guides{% endblock %}</title>
+  {% block meta %}<meta name="description" content="How hard is it to get an OAuth app approved? Difficulty, time, blockers and evidence for each provider.">{% endblock %}
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">OAuth App Setup Guides</a>
+    <nav>
+      <a href="/">Library</a>
+      <a href="/audit">Evidence audit</a>
+      <a href="/about">How it works</a>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    Guides describe provider OAuth apps (layer 1). Evidence labels: <b>tested</b> = observed by a check we ran,
+    <b>cited</b> = stated by a linked source, <b>inferred</b> = reasoning, <b>unknown</b> = not determined.
+    Provider rules change; check the dates.
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

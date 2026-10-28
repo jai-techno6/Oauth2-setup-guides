@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}How it works | OAuth App Setup Guides{% endblock %}
+{% block content %}
+<section class="prose">
+  <h1>How it works</h1>
+
+  <h2>The problem this solves</h2>
+  <p>An AI agent that acts in a user's Gmail, Slack or HubSpot needs three things:</p>
+  <ol>
+    <li><b>A provider OAuth app</b>, registered once by the developer. It holds the client ID and secret,
+    redirect URI and scopes, and it controls the consent screen users see.</li>
+    <li><b>An integration</b> in the developer's product (for Composio, an auth config that points at that OAuth app).</li>
+    <li><b>User connections</b>: each end user approves the consent screen, and tokens are stored and refreshed.</li>
+  </ol>
+  <p>Layers 2 and 3 work the same way for every provider. Layer 1 varies a lot. GitHub takes a five-minute form.
+  Gmail can take weeks of verification plus a paid security assessment. LinkedIn needs a legal business entity
+  and partner approval. Developers usually find this out by trial and error, after they have planned a launch.
+  These guides tell them up front.</p>
+  <p>If Composio already manages an OAuth app for a provider, a developer can skip layer 1 while prototyping.
+  They still need their own app to show their brand on the consent screen, request custom scopes, or get their
+  own rate limits. Each guide says which case applies.</p>
+
+  <h2>What a guide answers</h2>
+  <ul>
+    <li><b>Difficulty tier</b>, set by the hardest step needed before external users can connect.</li>
+    <li><b>Time</b>, split into hands-on effort and waiting on the provider, plus the fastest way to start
+    before approval (testing mode, internal apps, install caps).</li>
+    <li><b>Requirements, gotchas and blockers</b>, each with a workaround where one exists.</li>
+    <li><b>Agent vs. you:</b> which steps can be automated, and where a person has to log in, pay, sign terms,
+    upload business documents or record a demo video.</li>
+    <li><b>Evidence</b> for every claim, plus what is still uncertain.</li>
+  </ul>
+
+  <h2>Evidence labels</h2>
+  <dl>
+    <dt><span class="ev ev-tested">tested</span></dt><dd>Observed by a check that was run: an HTTP probe of discovery documents,
+    endpoints or the developer console, or a live Composio catalog lookup. Each one has a timestamp.</dd>
+    <dt><span class="ev ev-cited">cited</span></dt><dd>A linked source states it. A &#10003; means the quote was found on the
+    cited page. In agent guides, a quote that cannot be found on a readable page is automatically downgraded to inferred.</dd>
+    <dt><span class="ev ev-inferred">inferred</span></dt><dd>Reasoning from cited facts, such as a hands-on estimate based on
+    the number of steps. Treat it as a plan, not a promise.</dd>
+    <dt><span class="ev ev-unknown">unknown</span></dt><dd>Not determined. Listed so you know to ask.</dd>
+  </dl>
+  <p>Sources are tagged <i>official</i> (provider domains), <i>Composio</i>, or <i>third-party</i>. Prices and review
+  times that only third-party posts state are marked that way.</p>
+
+  <h2>The live agent</h2>
+  <ol>
+    <li><b>Research:</b> three web-search passes run in parallel: registration and OAuth basics; review, verification and
+    distribution limits; paid tiers, restrictions and recent changes. Each finding must include a URL and a verbatim quote.</li>
+    <li><b>Write:</b> the notes and numbered sources go into a strict JSON schema. The model may only label claims
+    cited, inferred or unknown. Only code-run checks can produce tested.</li>
+    <li><b>Probe:</b> without any credentials, the agent fetches OAuth/OpenID discovery documents, checks that the
+    authorization endpoint is live, and opens the developer console. When the console redirects to a login page or
+    blocks bots, that is recorded as the point where a person has to take over.</li>
+    <li><b>Composio check</b> (if configured): the live toolkit catalog says whether a managed OAuth app exists.</li>
+    <li><b>Verify:</b> the cited pages are fetched and each quote is searched for. Missing source IDs, unsupported
+    citations and quotes that cannot be found all lower the evidence label.</li>
+  </ol>
+  <p>The agent never logs in, creates accounts, solves CAPTCHAs or accepts terms on your behalf.</p>
+</section>
+{% endblock %}

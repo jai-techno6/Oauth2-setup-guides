@@ -1,0 +1,114 @@
+{
+  "slug": "linkedin",
+  "app_name": "LinkedIn",
+  "app_url": "https://www.linkedin.com",
+  "aliases": ["linkedin", "linkedin.com", "linkedin api"],
+  "origin": "curated",
+  "generated_at": "2026-10-28",
+  "model": "curated",
+  "summary": "Gated. Anyone can create a LinkedIn app and get sign-in (profile, email) plus posting as the member (w_member_social) self-serve. Company pages, analytics, ads and sales data need LinkedIn's approval. That is only open to registered legal organizations, goes through a development tier then a standard tier, and a rejection means starting again with a new app. Decide which product you actually need before you build.",
+  "oauth_support": "yes",
+  "oauth_support_claim": {"text": "LinkedIn uses OAuth 2.0 and publishes an OpenID Connect discovery document.", "evidence": "tested", "source_ids": [5], "quote": "", "quote_check": "no_quote", "note": "Discovery document fetched on 2026-10-28."},
+  "difficulty": "gated",
+  "difficulty_claim": {
+    "text": "Only 'Open Permissions' (sign-in and member posting) are self-serve. Most other permissions and partner programs need explicit approval from LinkedIn.",
+    "evidence": "cited", "source_ids": [1],
+    "quote": "Most permissions and partner programs require explicit approval from LinkedIn.",
+    "quote_check": "verified", "note": ""
+  },
+  "composio": {
+    "status": "unknown",
+    "claim": {"text": "Not confirmed whether Composio manages a LinkedIn OAuth app. Even a managed app cannot give you scopes LinkedIn has not approved for that app.", "evidence": "unknown", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Set COMPOSIO_API_KEY and regenerate to check the live catalog."}
+  },
+  "endpoints": {
+    "developer_console_url": "https://www.linkedin.com/developers/apps/new",
+    "docs_url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access",
+    "authorization_url": "https://www.linkedin.com/oauth/v2/authorization",
+    "token_url": "https://www.linkedin.com/oauth/v2/accessToken",
+    "evidence": "tested",
+    "note": "Read from LinkedIn's live OpenID discovery document on 2026-10-28."
+  },
+  "time": {
+    "hands_on": {"text": "15-30 minutes for a self-serve app; days of prep for a partner application", "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": "Estimate."},
+    "approval_wait": {"text": "Self-serve products: none. Partner products: not published. LinkedIn says it may contact you up to 60 days after some access forms.", "evidence": "cited", "source_ids": [4],
+      "quote": "LinkedIn will contact you up to 60 days after the form submission only if we will identify meeting access criteria and a strong partnership fit.", "quote_check": "not_checked",
+      "note": "From LinkedIn's 'Increasing Access' page (search snippet). It applies to Marketing access increases, not to every program."},
+    "fastest_path": {"text": "Use 'Sign In with LinkedIn using OpenID Connect' and 'Share on LinkedIn' right away. Apply for Community Management API development tier in parallel if you need company pages.", "evidence": "cited", "source_ids": [1], "quote": "", "quote_check": "no_quote", "note": ""}
+  },
+  "phases": [
+    {
+      "name": "Create the app (self-serve)",
+      "summary": "",
+      "steps": [
+        {"title": "Create the app and associate a LinkedIn Page", "detail": "Each app must be tied to a company Page. A super admin of that Page has to verify the app. If you administer the Page, this is quick.", "who": "human", "why_human": "LinkedIn login and Page admin approval.", "url": "https://www.linkedin.com/developers/apps/new",
+          "evidence": "cited", "source_ids": [2], "quote": "Ensure a super admin of the LinkedIn Page associated with your organization has verified your application.", "quote_check": "verified", "note": "The source states this for gated (Community Management) access. That the app creation form itself requires a Page comes from developer reports and was not verified against official docs."},
+        {"title": "Do not use 'Linked' or 'In' in the app name or logo", "detail": "Apps that include LinkedIn or Microsoft names or logos are rejected in vetting.", "who": "agent", "why_human": "", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "Ensure that your application doesn't include any portion of the LinkedIn or Microsoft names or logos", "quote_check": "verified", "note": ""},
+        {"title": "Add self-serve products", "detail": "Products tab: 'Sign In with LinkedIn using OpenID Connect' (openid, profile, email) and 'Share on LinkedIn' (w_member_social).", "who": "human", "why_human": "Console login.", "url": "",
+          "evidence": "cited", "source_ids": [1], "quote": "Open Permissions are the only permissions that are available to all developers without special approval.", "quote_check": "verified", "note": ""},
+        {"title": "Add the Composio redirect URL and copy credentials", "detail": "Auth tab: add the redirect URL from your Composio auth config, then copy the client ID and secret.", "who": "human", "why_human": "Console login.", "url": "",
+          "evidence": "inferred", "source_ids": [], "quote": "", "quote_check": "no_quote", "note": ""}
+      ]
+    },
+    {
+      "name": "Apply for gated access (if needed)",
+      "summary": "Company pages, analytics, ads, sales or talent data.",
+      "steps": [
+        {"title": "Check your use case is allowed", "detail": "Read the API terms and the restricted-use list. Community Management is commercial-only, for registered legal organizations.", "who": "agent", "why_human": "", "url": "https://learn.microsoft.com/en-us/linkedin/marketing/community-management-app-review",
+          "evidence": "cited", "source_ids": [2], "quote": "our Community Management APIs are only available to registered legal organizations for commercial use cases only", "quote_check": "verified", "note": ""},
+        {"title": "Submit the development tier access form", "detail": "Needs a verified business email (personal email fails), legal name, registered address, website and privacy policy.", "who": "human", "why_human": "Business identity documents and email verification.", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "Personal email addresses won't pass the vetting process.", "quote_check": "verified", "note": ""},
+        {"title": "Build the integration, then apply for standard tier with a screencast", "detail": "Record a narrated, downloadable, high-resolution screencast of each use case, and provide test credentials.", "who": "human", "why_human": "Recording and reviewer credentials.", "url": "",
+          "evidence": "cited", "source_ids": [2], "quote": "Ensure the screen recording is high resolution and downloadable.", "quote_check": "verified", "note": ""}
+      ]
+    }
+  ],
+  "requirements": [
+    {"title": "LinkedIn company Page with a super admin", "detail": "Needed to verify every app.", "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": ""},
+    {"title": "Registered legal organization (gated products)", "detail": "Individuals and personal emails do not pass vetting for Community Management.", "evidence": "cited", "source_ids": [2], "quote": "", "quote_check": "no_quote", "note": ""}
+  ],
+  "gotchas": [
+    {"title": "No refresh tokens for most apps", "detail": "Access tokens last 60 days. Programmatic refresh tokens (365 days, not extended by refreshing) are only for approved Marketing Developer Platform partners. Self-serve apps must send users through OAuth again.", "evidence": "cited", "source_ids": [3], "quote": "LinkedIn supports programmatic refresh tokens for all approved Marketing Developer Platform (MDP) partners.", "quote_check": "verified", "note": ""},
+    {"title": "A rejection means a new app", "detail": "If a development or standard tier request is rejected, you cannot reapply with the same app. You have to create a new app and start again.", "evidence": "cited", "source_ids": [2], "quote": "You won't be able to re-apply for Development tier access with your existing app.", "quote_check": "verified", "note": ""},
+    {"title": "Compliance APIs are closed", "detail": "r_compliance and w_compliance cannot be requested.", "evidence": "cited", "source_ids": [1], "quote": "Access is closed and may not be requested.", "quote_check": "verified", "note": ""}
+  ],
+  "blockers": [
+    {"title": "Partner approval for company pages, ads, sales and talent data", "detail": "LinkedIn decides. Approval is not guaranteed and can be revoked later for non-compliance.", "workaround": "Limit v1 to member sign-in and member posting. Apply for development tier early, with a business email and a verified Page.", "evidence": "cited", "source_ids": [1, 2], "quote": "", "quote_check": "no_quote", "note": ""},
+    {"title": "Reading other members' data or messaging at scale", "detail": "No self-serve product offers this, and the partner programs cover specific use cases.", "workaround": "Redesign the feature around the member's own content, or apply to the matching partner program.", "evidence": "inferred", "source_ids": [1], "quote": "", "quote_check": "no_quote", "note": "Inferred from the permission list. LinkedIn does not state it in one sentence."}
+  ],
+  "agent_can": [
+    "Map your feature list to LinkedIn products and say which ones need approval",
+    "Check the app name and logo against naming rules",
+    "Draft the access-request answers and the screencast script for each use case",
+    "Read the discovery document and confirm endpoints (done: tested 2026-10-28)"
+  ],
+  "human_must": [
+    "Log in and create the app (the developer portal refused automated access)",
+    "Approve the app as a super admin of the LinkedIn Page",
+    "Provide legal entity details and a verified business email",
+    "Record the screencast and provide reviewer test credentials"
+  ],
+  "conflicts": [],
+  "unknowns": [
+    "Typical review time for Community Management development and standard tiers (not published).",
+    "Whether Composio manages a LinkedIn app and which products it has approved."
+  ],
+  "sources": [
+    {"id": 1, "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access", "title": "Getting Access to LinkedIn APIs", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 2, "url": "https://learn.microsoft.com/en-us/linkedin/marketing/community-management-app-review", "title": "Community Management App Review - LinkedIn", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 3, "url": "https://learn.microsoft.com/en-us/linkedin/shared/authentication/programmatic-refresh-tokens", "title": "Refresh Tokens with OAuth 2.0 - LinkedIn", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 4, "url": "https://learn.microsoft.com/en-us/linkedin/marketing/increasing-access", "title": "Increasing Access - LinkedIn", "kind": "official", "accessed": "2026-10-28"},
+    {"id": 5, "url": "https://www.linkedin.com/oauth/.well-known/openid-configuration", "title": "LinkedIn OpenID discovery document (live)", "kind": "probe", "accessed": "2026-10-28"}
+  ],
+  "probes": [
+    {"check": "OAuth/OpenID discovery", "url": "https://www.linkedin.com/oauth/.well-known/openid-configuration", "outcome": "pass", "result": "Discovery document found. authorization_endpoint=https://www.linkedin.com/oauth/v2/authorization; token_endpoint=https://www.linkedin.com/oauth/v2/accessToken; scopes_supported: openid, profile, email; PKCE methods not advertised.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"},
+    {"check": "Developer console (where the agent stops)", "url": "https://www.linkedin.com/developers/apps/new", "outcome": "blocked", "result": "HTTP 403 for an automated client. A human must log in to create the app.", "checked_at": "2026-10-28", "method": "Kiro web_fetch (no credentials)"}
+  ],
+  "audit": [
+    {"claim": "LinkedIn is gated", "status": "verified", "method": "Fetched 'Getting Access' and 'Community Management App Review' on 2026-10-28.", "note": "Sharpened: sign-in and member posting are self-serve. Company pages and other products are gated and need a legal entity.", "source_ids": [1, 2]},
+    {"claim": "LinkedIn issues refresh tokens", "status": "corrected", "method": "Fetched LinkedIn refresh-token docs.", "note": "Refresh tokens are only for approved MDP partners. Self-serve apps get 60-day access tokens and users have to re-consent.", "source_ids": [3]},
+    {"claim": "Partner review takes up to 60 days", "status": "unverified", "method": "Search snippet of 'Increasing Access'.", "note": "That page covers Marketing access increases. No published time for Community Management tiers.", "source_ids": [4]},
+    {"claim": "Endpoints", "status": "verified", "method": "Live discovery document fetch.", "note": "The discovery document does not advertise PKCE methods. That is recorded as observed, not as 'PKCE unsupported'.", "source_ids": [5]}
+  ],
+  "pipeline_log": []
+}
